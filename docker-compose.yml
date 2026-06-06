@@ -1,0 +1,62 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    command: ["postgres", "-c", "max_connections=300", "-c", "shared_buffers=256MB"]
+    environment:
+      POSTGRES_DB: surface_tester
+      POSTGRES_USER: surface
+      POSTGRES_PASSWORD: surface
+
+    ports:
+      - "5432:5432"
+
+
+
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+  juice-shop:
+    image: bkimminich/juice-shop
+    ports:
+      - "3000:3000"
+
+  control-api:
+    build: ./control
+    ports:
+      - "8080:8080"
+
+    environment:
+      NATS_URL: nats://nats:4222
+      DATABASE_URL: postgres://surface:surface@postgres:5432/surface_tester?sslmode=disable
+
+    volumes:
+      - ./test-packs:/app/test-packs:ro
+
+    depends_on:
+      - postgres
+      - nats
+
+  worker-rust:
+    build: ./worker
+    environment:
+      NATS_URL: nats://nats:4222
+      DATABASE_URL: postgres://surface:surface@postgres:5432/surface_tester?sslmode=disable
+      SCOPE_PATH: /app/scopes/local-juice-shop.yaml
+      HELLION_VERBOSE_EVENTS: "false"
+      BENCHMARK_MODE: "false"
+      STATE_BATCH_SIZE: "64"
+      PG_POOL_SIZE: "12"
+    volumes:
+      - ./scopes:/app/scopes:ro
+      - ./test-packs:/app/test-packs:ro
+    depends_on:
+      - postgres
+      - control-api
+      - juice-shop
+
+

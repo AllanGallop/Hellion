@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Hellion Control API
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: API is healthy
+
+  /runs:
+    get:
+      summary: List runs
+      responses:
+        "200":
+          description: List of runs
+
+    post:
+      summary: Create run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRunRequest"
+      responses:
+        "200":
+          description: Run queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+
+  /runs/{run_id}:
+    get:
+      summary: Get run status
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+
+    delete:
+      summary: Delete run
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run deleted
+
+  /runs/{run_id}/events:
+    get:
+      summary: Get run events as NDJSON
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: NDJSON event stream/history
+          content:
+            application/x-ndjson:
+              schema:
+                type: string
+
+  /runs/{run_id}/cancel:
+    post:
+      summary: Cancel run
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run cancelled
+
+  /admin/queue/clear:
+    post:
+      summary: Clear pending job queue
+      responses:
+        "200":
+          description: Queue cleared
+
+  /admin/runs/clear:
+    post:
+      summary: Clear all run history
+      responses:
+        "200":
+          description: Runs cleared
+
+components:
+  parameters:
+    RunId:
+      name: run_id
+      in: path
+      required: true
+      schema:
+        type: string
+        example: run_20260605175954
+
+  schemas:
+    CreateRunRequest:
+      type: object
+      required:
+        - scope_id
+        - targets
+        - test_pack
+      properties:
+        scope_id:
+          type: string
+          example: local-juice-shop
+        targets:
+          type: array
+          items:
+            type: string
+          example:
+            - http://juice-shop:3000
+        test_pack:
+          type: string
+          example: juice-shop-detect
+
+    Run:
+      type: object
+      properties:
+        run_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - queued
+            - running
+            - completed
+            - cancelled
+            - failed
+        outcome:
+          type: string
+          enum:
+            - unknown
+            - not_exploitable
+            - potentially_exploitable
+            - exploitable
+            - error
+        scope_id:
+          type: string
+        test_pack:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Event:
+      type: object
+      properties:
+        event_type:
+          type: string
+          example: finding.created
+        run_id:
+          type: string
+        target:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          nullable: true

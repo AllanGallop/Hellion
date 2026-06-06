@@ -1,0 +1,8 @@
+scope_id: local-juice-shop
+allowed_origins:
+  - http://juice-shop:3000
+allowed_methods:
+  - GET
+  - HEAD
+max_rps: 0
+worker_concurrency: 25

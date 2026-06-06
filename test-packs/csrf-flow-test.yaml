@@ -1,0 +1,33 @@
+id: csrf-flow-test
+name: CSRF extract and form submit test
+
+steps:
+  - http:
+      id: login_page
+      method: GET
+      path: /login
+
+  - extract:
+      response: login_page
+      from: body
+      regex: 'name="_token" value="([^"]+)"'
+      into: csrf_token
+
+  - http:
+      id: login_attempt
+      method: POST
+      path: /login
+      form:
+        _token: "{{ csrf_token }}"
+        email: test@example.com
+        password: password123
+
+  - assert:
+      response: login_attempt
+      status_not: 500
+      severity: high
+      message: Login attempt should not cause server error
+
+  - finding:
+      severity: info
+      message: CSRF extraction and form POST flow completed

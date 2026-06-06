@@ -1,0 +1,26 @@
+id: headers-basic
+name: Basic security header checks
+
+steps:
+  - http:
+      id: home
+      method: GET
+      path: /
+
+  - assert:
+      response: home
+      status_lt: 500
+      severity: high
+      message: Server returned 5xx
+
+  - assert:
+      response: home
+      header_absent: content-security-policy
+      severity: medium
+      message: Missing Content-Security-Policy header
+
+  - assert:
+      response: home
+      header_absent: x-frame-options
+      severity: low
+      message: Missing X-Frame-Options header

@@ -1,0 +1,38 @@
+id: http-rich-test
+name: HTTP rich request test
+
+steps:
+  - http:
+      id: api_probe
+      method: POST
+      path: /rest/user/login
+      timeout_ms: 5000
+      headers:
+        Accept: application/json
+      json:
+        email: test@example.com
+        password: password123
+
+  - assert:
+      response: api_probe
+      status_not: 500
+      severity: high
+      message: Login API should not return server error
+
+  - assert:
+      response: api_probe
+      header_contains:
+        name: content-type
+        value: application/json
+      severity: info
+      message: Login API returns JSON
+
+  - assert:
+      response: api_probe
+      body_not_contains: "SQL syntax"
+      severity: high
+      message: No SQL error leaked
+
+  - finding:
+      severity: info
+      message: HTTP rich request flow completed

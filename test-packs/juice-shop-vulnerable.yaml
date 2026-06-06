@@ -1,0 +1,24 @@
+id: juice-shop-detect
+name: Detect OWASP Juice Shop
+
+steps:
+  - http:
+      id: root
+      method: GET
+      path: /
+
+  - assert:
+      response: root
+      status: 200
+      severity: info
+      message: Target responded with HTTP 200
+
+  - assert:
+      response: root
+      body_contains: "OWASP Juice Shop"
+      severity: info
+      message: Body contains OWASP Juice Shop fingerprint
+
+  - finding:
+      severity: critical
+      message: OWASP Juice Shop detected - intentionally vulnerable lab target
