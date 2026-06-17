@@ -64,10 +64,7 @@ fi
 echo "Checking events..."
 EVENTS="$(curl -fsS "$API/runs/$RUN_ID/events")"
 
-echo "$EVENTS" | grep -q "target.started"
-echo "$EVENTS" | grep -q "request.sent"
-echo "$EVENTS" | grep -q "request.completed"
-echo "$EVENTS" | grep -q "assert.passed"
+# With HELLION_VERBOSE_EVENTS=false (default in compose), only high-signal events are stored.
 echo "$EVENTS" | grep -q "finding.created"
 echo "$EVENTS" | grep -q "target.completed"
 
