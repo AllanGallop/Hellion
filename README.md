@@ -1,14 +1,17 @@
-[<img src=".github/images/logo.png" alt="Hellion — Electric Eye" width="480">](.github/images/logo.png)
+[<img src=".github/images/logo.png" alt="Hellion — Electric Eye" width="480"/>](.github/images/logo.png)
 
 # Hellion
-> What if Burp, Nuclei and Postgres had an ugly late night hookup behind a Greggs? 
+> **Disclaimer:** Hellion is for authorized security testing only. Only scan systems you own or have explicit written permission to test. Unauthorized access is illegal. The authors are not responsible for misuse.
 
-</br>
+[Performance](#performance) · [Quick start](#quick-start) · [Config](#config) · [Documentation](#documentation) · [Testing](#testing-and-benchmarks) · [Development](#development) · [Architecture](.github/docs/architecture.md)
 
 - No AI.
 - No blockchain.
 - No microservice named after a Greek god.
 - Just werxs good n fast
+
+
+## Performance Summary
 
 | Runs | Queue (ms) | Worker (ms) | Total (ms) | Queue rate | Worker rate | Total rate |
 |------|------------|-------------|------------|------------|-------------|------------|
