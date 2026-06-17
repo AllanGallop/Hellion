@@ -1,5 +1,5 @@
 
-[<img src=".github/images/logo.png" alt="Hellion Logo" width="300px"/>](.github/images/logo.png)
+[<img src=".github/images/logo.png" alt="Hellion Logo"/>](.github/images/logo.png)
 
 # Hellion
 
@@ -29,6 +29,19 @@
 
 
 See the [architecture guide](.github/docs/architecture.md) for component overview, flows, and run lifecycle.
+
+
+## Documentation
+
+
+| Guide                                              | Description                      |
+| -------------------------------------------------- | -------------------------------- |
+| [Architecture guide](.github/docs/architecture.md) | Components, flows, run lifecycle |
+| [API guide](.github/docs/api.md)                   | Endpoints, run lifecycle, events |
+| [Test packs guide](.github/docs/test-packs.md)     | Writing HTTP check workflows     |
+| [Performance guide](.github/docs/performance.md)   | Benchmarks and tuning            |
+| [OpenAPI spec](.github/docs/openapi.yaml)          | Machine-readable API schema      |
+
 
 ## Quick start
 
@@ -151,18 +164,6 @@ Scale workers horizontally:
 ```bash
 docker compose up -d --scale worker-rust=4
 ```
-
-## Documentation
-
-
-| Guide                                              | Description                      |
-| -------------------------------------------------- | -------------------------------- |
-| [Architecture guide](.github/docs/architecture.md) | Components, flows, run lifecycle |
-| [API guide](.github/docs/api.md)                   | Endpoints, run lifecycle, events |
-| [Test packs guide](.github/docs/test-packs.md)     | Writing HTTP check workflows     |
-| [Performance guide](.github/docs/performance.md)   | Benchmarks and tuning            |
-| [OpenAPI spec](.github/docs/openapi.yaml)          | Machine-readable API schema      |
-
 
 ## Project layout
 
