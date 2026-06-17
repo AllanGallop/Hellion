@@ -1,7 +1,5 @@
 # Writing Test Packs
 
-Test packs are YAML files that describe a multi-step HTTP check against a target. Workers load them at startup from `/app/test-packs/` and execute steps sequentially for each job.
-
 ## File layout
 
 ```
@@ -292,20 +290,6 @@ Ensure your test pack only uses methods and paths reachable within the active sc
 | `scope.blocked` | Request blocked by scope |
 | `target.completed` | All steps finished |
 
-Set `HELLION_VERBOSE_EVENTS=false` on workers to store only high-signal events. Set `BENCHMARK_MODE=true` to skip event storage entirely while still updating run status.
-
-## Tips
-
-1. **Name HTTP steps clearly** — `id` values are the API between steps; keep them short and unique within a pack.
-2. **One concern per assert** — smaller asserts produce clearer failure messages.
-3. **Use `status_not: 500`** for API probes where any non-error response is acceptable.
-4. **Put findings last** — record conclusions after checks pass.
-5. **Match filename to `id`** — use `my-pack.yaml` with `id: my-pack` so `test_pack: my-pack` resolves predictably.
-6. **Test locally** — mount `./test-packs` into control-api and worker containers (default in docker-compose) and run a single target before benchmarking.
-
-```bash
-./tests/e2e.sh
-```
 
 ## Related docs
 

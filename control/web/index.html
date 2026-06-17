@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hellion</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <img src="/logo-eye.png" alt="Hellion" />
+      <h1>Hellion</h1>
+    </header>
+
+    <main>
+      <div id="view-dashboard">
+        <section>
+          <h2>Stats</h2>
+          <div class="stats" id="stats">
+            <div class="stat"><span id="stat-queued">—</span><label>Queued</label></div>
+            <div class="stat"><span id="stat-running">—</span><label>Running</label></div>
+            <div class="stat"><span id="stat-completed">—</span><label>Completed</label></div>
+            <div class="stat"><span id="stat-cancelled">—</span><label>Cancelled</label></div>
+            <div class="stat"><span id="stat-total">—</span><label>Total</label></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>New run</h2>
+          <form id="create-form">
+            <label for="scope">Scope</label>
+            <select id="scope" name="scope_id">
+              <option value="local-juice-shop">local-juice-shop</option>
+            </select>
+
+            <label for="test-pack">Test pack</label>
+            <select id="test-pack" name="test_pack">
+              <option value="juice-shop-detect">juice-shop-detect</option>
+              <option value="juice-shop-vulnerable">juice-shop-vulnerable</option>
+              <option value="headers-basic">headers-basic</option>
+              <option value="http-rich-test">http-rich-test</option>
+              <option value="csrf-flow-test">csrf-flow-test</option>
+            </select>
+
+            <label for="targets">Targets (one per line)</label>
+            <textarea id="targets" name="targets" placeholder="http://juice-shop:3000">http://juice-shop:3000</textarea>
+            <p class="hint">Workers use the Docker network — use service names like <code>juice-shop:3000</code>, not <code>localhost</code>.</p>
+
+            <div class="actions">
+              <button type="submit">Create run</button>
+            </div>
+            <p id="create-error" class="error hidden"></p>
+          </form>
+        </section>
+
+        <section>
+          <div class="actions" style="margin-bottom: 0.75rem">
+            <h2 style="margin: 0; flex: 1">Recent runs</h2>
+            <button type="button" class="secondary" id="refresh-runs">Refresh</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Status</th>
+                <th>Outcome</th>
+                <th>Pack</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="runs-body"></tbody>
+          </table>
+          <p id="runs-error" class="error hidden"></p>
+        </section>
+
+        <section>
+          <h2>Admin</h2>
+          <div class="actions">
+            <button type="button" class="danger" id="clear-runs">Clear all runs</button>
+            <button type="button" class="secondary" id="clear-queue">Clear queue</button>
+          </div>
+        </section>
+      </div>
+
+      <div id="view-run" class="hidden">
+        <section>
+          <div class="actions" style="margin-bottom: 0.75rem">
+            <button type="button" class="secondary" id="back-dashboard">← Back</button>
+            <button type="button" class="secondary" id="cancel-run">Cancel</button>
+            <button type="button" class="danger" id="delete-run">Delete</button>
+          </div>
+          <dl class="meta" id="run-meta"></dl>
+          <p id="run-error" class="error hidden"></p>
+        </section>
+
+        <section>
+          <h2>Events</h2>
+          <ul class="events" id="events-list"></ul>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

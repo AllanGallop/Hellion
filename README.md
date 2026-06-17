@@ -1,36 +1,50 @@
+[<img src=".github/images/logo.png" alt="Hellion — Electric Eye" width="480">](.github/images/logo.png)
+
 # Hellion
+> What if Burp, Nuclei and Postgres had an ugly late night hookup behind a Greggs? 
 
-Hellion is a distributed HTTP security testing platform. You define **scopes** (what workers are allowed to hit), **test packs** (multi-step HTTP checks), and submit **runs** through a Control API. Rust workers pull jobs from NATS, execute test packs against targets, and write run state and events to Postgres.
+</br>
 
-The default stack includes [OWASP Juice Shop](https://owasp.org/www-project-juice-shop/) as a sample target.
+- No AI.
+- No blockchain.
+- No microservice named after a Greek god.
+- Just werxs good n fast
+
+| Runs | Queue (ms) | Worker (ms) | Total (ms) | Queue rate | Worker rate | Total rate |
+|------|------------|-------------|------------|------------|-------------|------------|
+| 100 | 76 | 292 | 423 | 1,316/s | 342/s | 236/s |
+| 1,000 | 73 | 865 | 994 | 13,699/s | 1,156/s | 1,006/s |
+| 10,000 | 168 | 3,892 | 4,122 | 59,524/s | 2,569/s | 2,426/s |
+| 100,000 | 1,020 | 43,782 | 44,870 | 98,039/s | 2,284/s | 2,229/s |
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    subgraph clients [Clients]
+    subgraph clients [Humans and questionable automation]
         CLI[curl / scripts]
     end
 
-    subgraph control [Control plane]
-        API[control-api<br/>Go HTTP API :8080]
+    subgraph control [Control Plane]
+        API[Go API]
     end
 
-    subgraph messaging [Messaging]
-        NATS[NATS :4222<br/>job queue]
+    subgraph messaging [Job Queue]
+        NATS[NATS]
     end
 
-    subgraph storage [Storage]
-        PG[(Postgres :5432<br/>runs + events)]
+    subgraph storage [State]
+        PG[(Postgres)]
     end
 
-    subgraph workers [Workers]
-        W1[worker-rust]
-        W2[worker-rust ...]
+    subgraph workers [Rust Workers]
+        W1[worker]
+        W2[worker]
+        W3[worker]
     end
 
-    subgraph targets [Targets]
-        JS[Juice Shop :3000]
+    subgraph targets [Things You Are Allowed To Test]
+        JS[Juice Shop]
     end
 
     CLI --> API
@@ -38,17 +52,20 @@ flowchart TB
     API --> NATS
     NATS --> W1
     NATS --> W2
-    W1 --> PG
-    W2 --> PG
+    NATS --> W3
     W1 --> JS
     W2 --> JS
+    W3 --> JS
+    W1 --> PG
+    W2 --> PG
+    W3 --> PG
 ```
 
 | Component | Role |
 |-----------|------|
-| **control-api** | REST API for creating runs, listing status, reading events |
-| **worker-rust** | Executes test packs; enforces scope; batches state writes to Postgres |
-| **NATS** | Distributes jobs to workers (`hellion.jobs.http.{scope_id}`) |
+| **control-api** | REST API |
+| **worker-rust** | Does the work |
+| **NATS** | Distributes jobs to worker |
 | **Postgres** | Run metadata, event history, aggregated stats |
 
 ## Operational flow
@@ -71,7 +88,7 @@ sequenceDiagram
     API-->>C: run_id, status=queued
 ```
 
-Run IDs are UUID v4 values prefixed with `run_`, e.g. `run_550e8400-e29b-41d4-a716-446655440000`.
+Run IDs are UUID v4 values prefixed with `run_`
 
 ### Worker execution
 
@@ -105,8 +122,6 @@ sequenceDiagram
     Note over W,PG: critical/high findings set outcome=potentially_exploitable
 ```
 
-Workers batch Postgres writes: status updates flush immediately; events are bulk-inserted when the buffer fills or the job completes.
-
 ### Run lifecycle
 
 ```mermaid
@@ -121,36 +136,16 @@ stateDiagram-v2
 
 ## Quick start
 
-### Prerequisites
 
-- Docker and Docker Compose
-
-### Start the stack
+### Start shit
 
 ```bash
 docker compose up --build
 ```
 
-Services:
+Open **http://localhost:8080** for the web UI (same port as the API).
 
-| Service | URL |
-|---------|-----|
-| Control API | http://localhost:8080 |
-| Juice Shop | http://localhost:3000 |
-| NATS monitor | http://localhost:8222 |
-| Postgres | localhost:5432 |
-
-### Run an end-to-end test
-
-From a shell with access to the API (inside the compose network or via port 8080):
-
-```bash
-bash tests/e2e.sh
-```
-
-This clears state, creates a Juice Shop detection run, waits for completion, and verifies events and outcome.
-
-### Create a run manually
+### Throw shit
 
 ```bash
 curl -X POST http://localhost:8080/runs \
@@ -162,7 +157,7 @@ curl -X POST http://localhost:8080/runs \
   }'
 ```
 
-Poll status or read events:
+### Read shit
 
 ```bash
 curl http://localhost:8080/runs/stats
@@ -170,11 +165,11 @@ curl http://localhost:8080/runs/{run_id}
 curl http://localhost:8080/runs/{run_id}/events
 ```
 
-## Configuration
+## Config
 
 ### Scopes
 
-Scopes live in `scopes/` and are mounted into workers at `/app/scopes/`. Example (`scopes/local-juice-shop.yaml`):
+Scopes live in `scopes/` and are mounted into workers at `/app/scopes/`
 
 ```yaml
 scope_id: local-juice-shop
@@ -193,20 +188,20 @@ worker_concurrency: 25
 | `allowed_origins` | Base URLs workers may request |
 | `allowed_methods` | HTTP methods permitted |
 | `max_rps` | Per-worker rate limit (0 = unlimited) |
-| `worker_concurrency` | Concurrent jobs per worker process |
+| `worker_concurrency` | Concurrent jobs per worker |
 
 Set `SCOPE_PATH` on the worker to point at the scope file.
 
 ### Test packs
 
-Test packs live in `test-packs/` as YAML files. See the [test packs guide](.github/docs/test-packs.md) for the full reference. Each pack is a sequence of steps:
+Test packs live in `test-packs/` as YAML files, duh. [READ THIS](.github/docs/test-packs.md). Each pack is made of steps:
 
 | Step type | Purpose |
 |-----------|---------|
 | `http` | Send a request (method, path, headers, body, JSON, form) |
 | `assert` | Check status, headers, or body of a named response |
-| `extract` | Capture a regex group into a variable for later steps |
-| `finding` | Record a security finding with severity |
+| `extract` | Capture a regex group into a variable |
+| `finding` | Record a finding |
 
 Example (`test-packs/juice-shop-detect.yaml`):
 
@@ -227,7 +222,6 @@ steps:
       message: OWASP Juice Shop detected
 ```
 
-Available packs: `juice-shop-detect`, `juice-shop-vulnerable`, `headers-basic`, `http-rich-test`, `csrf-flow-test`.
 
 ### Environment variables
 
@@ -269,7 +263,7 @@ docker compose up -d --scale worker-rust=4
 
 ```
 Hellion/
-├── control/           # Go Control API
+├── control/           # Go Control API + embedded web UI (control/web/)
 ├── worker/            # Rust job worker
 ├── scopes/            # Worker scope definitions
 ├── test-packs/        # YAML test pack definitions
@@ -311,7 +305,3 @@ cd control && go build .
 docker compose build worker-rust control-api
 docker compose up -d
 ```
-
-## License
-
-Not specified.

@@ -1,6 +1,7 @@
 scope_id: local-juice-shop
 allowed_origins:
   - http://juice-shop:3000
+  - http://localhost:3000
 allowed_methods:
   - GET
   - HEAD

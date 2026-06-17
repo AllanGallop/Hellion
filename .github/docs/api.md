@@ -1,7 +1,5 @@
 # Hellion Control API
 
-The Control API is the entry point for creating test runs, polling status, and reading event history. It runs on port **8080** in the default docker-compose stack.
-
 - **OpenAPI spec:** [openapi.yaml](./openapi.yaml)
 - **Base URL (local):** `http://localhost:8080`
 
@@ -173,13 +171,13 @@ Jobs are published to:
 hellion.jobs.http.{scope_id}
 ```
 
-Workers subscribe with queue group `hellion-http-workers`, so jobs are load-balanced across worker instances.
+Workers subscribe with queue group `hellion-http-workers`, jobs are load-balanced across worker instances.
 
 ## Error responses
 
 | Code | Cause |
 |------|-------|
-| `400` | Missing fields, invalid JSON, or unknown test pack |
+| `400` | Missing fields, invalid JSON, or unknown |
 | `404` | Run not found |
 | `405` | Wrong HTTP method |
-| `500` | Redis or NATS failure |
+| `500` | Redis or NATS fucked |

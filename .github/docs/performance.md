@@ -1,7 +1,5 @@
 # Hellion Performance Guide
 
-Benchmark results and tuning notes for the default docker-compose stack targeting OWASP Juice Shop with the `juice-shop-detect` test pack.
-
 ## Test setup
 
 | Component | Configuration |
@@ -42,7 +40,7 @@ The script reports three metrics:
 
 ## Reference results
 
-Measured on Windows 11 host, Docker Desktop, single `worker-rust` replica unless noted. Results vary with CPU, worker replica count, and Juice Shop load.
+Measured on Windows 11 host (i7-12700F), Docker Desktop and a single `worker-rust` 
 
 ### Summary
 
@@ -59,34 +57,16 @@ Measured on Windows 11 host, Docker Desktop, single `worker-rust` replica unless
 
 **Worker throughput plateaus around 2.2–2.6k runs/sec** with one worker at concurrency 25. The bottleneck shifts from HTTP (Juice Shop) to Postgres event writes as run volume grows.
 
-**Tail latency grows at 100k.** Progress is steady until ~68k completed, then completion rate slows as the target and database contend. The run still finishes within the default 300s timeout when Postgres connection limits are configured correctly.
+**Tail latency grows at 100k.** Progress is steady until ~70k completed, then completion rate slows as the target and database contend. Might switch to Valkey later or maybe Dashmap to overcome this.
 
-**Earlier stalls (fixed).** Runs stuck at 99.6% were caused by Postgres `max_connections=100` being exceeded when multiple worker replicas each opened large connection pools. Current compose sets `max_connections=300` and `PG_POOL_SIZE=12` per worker.
 
-## Architecture and bottlenecks
-
-```mermaid
-flowchart LR
-    subgraph fast [Fast path]
-        API[control-api bulk create]
-        NATS[NATS publish]
-    end
-
-    subgraph slow [Worker-bound path]
-        HTTP[Juice Shop HTTP]
-        PG[(Postgres events + status)]
-    end
-
-    API --> NATS
-    NATS --> HTTP
-    HTTP --> PG
-```
+## Architecture
 
 | Stage | Typical limit | Notes |
 |-------|---------------|-------|
 | Bulk queue | 60k–100k runs/sec | Postgres batch insert + NATS flush |
 | NATS delivery | Very high | Queue group `hellion-http-workers` |
-| HTTP requests | Target-dependent | Juice Shop saturates under heavy parallel load |
+| HTTP requests | Target-dependent | Juice Shop dies under heavy parallel load |
 | Postgres writes | ~2–3k runs/sec | Event batching + patch-only flushes for status |
 
 ## Tuning

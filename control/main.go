@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +18,9 @@ import (
 	"github.com/nats-io/nats.go"
 	"gopkg.in/yaml.v3"
 )
+
+//go:embed web/*
+var webFS embed.FS
 
 var ctx = context.Background()
 
@@ -154,6 +159,13 @@ func main() {
 
 		clearRuns(w, r, store)
 	})
+
+	webRoot, err := fs.Sub(webFS, "web")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.Handle("/", http.FileServer(http.FS(webRoot)))
 
 	log.Println("control-api listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
